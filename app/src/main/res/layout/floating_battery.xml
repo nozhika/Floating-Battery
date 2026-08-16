@@ -4,17 +4,23 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:gravity="center"
-    android:background="#CC222222"
-    android:padding="10dp">
+    android:gravity="center_vertical"
+    android:background="@drawable/bg_floating_battery"
+    android:elevation="8dp">
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_battery"
+        android:contentDescription="Baterai" />
 
     <TextView
         android:id="@+id/tvBatteryPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="7dp"
         android:text="--%"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="15sp"
         android:textStyle="bold" />
-
 </LinearLayout>
