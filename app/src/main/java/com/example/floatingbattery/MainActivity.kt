@@ -5,30 +5,35 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var tvStatus: TextView
+    private lateinit var tvPosition: TextView
+    private lateinit var btnGrantPermission: MaterialButton
+    private lateinit var btnStart: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         tvStatus = findViewById(R.id.tvStatus)
-        val btnGrantPermission = findViewById<Button>(R.id.btnGrantPermission)
-        val btnStart = findViewById<Button>(R.id.btnStart)
-        val btnStop = findViewById<Button>(R.id.btnStop)
+        tvPosition = findViewById(R.id.tvPosition)
+        btnGrantPermission = findViewById(R.id.btnGrantPermission)
+        btnStart = findViewById(R.id.btnStart)
+        val btnStop = findViewById<MaterialButton>(R.id.btnStop)
 
         btnGrantPermission.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName")
+                startActivity(
+                    Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
                 )
-                startActivity(intent)
             }
         }
 
@@ -41,12 +46,13 @@ class MainActivity : AppCompatActivity() {
                     startService(serviceIntent)
                 }
             } else {
-                tvStatus.text = "Status izin: belum diizinkan. Tekan tombol izin dulu."
+                tvStatus.text = getString(R.string.permission_missing)
             }
         }
 
         btnStop.setOnClickListener {
             stopService(Intent(this, FloatingBatteryService::class.java))
+            tvStatus.text = getString(R.string.status_ready)
         }
     }
 
@@ -54,9 +60,22 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         val granted = Settings.canDrawOverlays(this)
         tvStatus.text = if (granted) {
-            "Status izin: sudah diizinkan"
+            getString(R.string.permission_granted)
         } else {
-            "Status izin: belum diizinkan"
+            getString(R.string.permission_missing)
+        }
+        btnGrantPermission.isEnabled = !granted
+        updatePositionLabel()
+    }
+
+    private fun updatePositionLabel() {
+        val prefs = getSharedPreferences(FloatingBatteryService.PREFS_NAME, MODE_PRIVATE)
+        if (prefs.contains(FloatingBatteryService.POSITION_X) && prefs.contains(FloatingBatteryService.POSITION_Y)) {
+            val x = prefs.getInt(FloatingBatteryService.POSITION_X, 0)
+            val y = prefs.getInt(FloatingBatteryService.POSITION_Y, 200)
+            tvPosition.text = getString(R.string.position_saved) + " • x=$x, y=$y"
+        } else {
+            tvPosition.text = "Posisi default"
         }
     }
 }
