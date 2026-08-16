@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Floating Battery</string>
+    <string name="app_subtitle">Indikator baterai yang selalu terlihat</string>
+    <string name="permission_title">Izin tampilan overlay</string>
+    <string name="permission_granted">Izin sudah diberikan</string>
+    <string name="permission_missing">Izin diperlukan untuk menampilkan indikator</string>
+    <string name="grant_permission">Berikan izin</string>
+    <string name="start_indicator">Mulai indikator</string>
+    <string name="stop_indicator">Hentikan indikator</string>
+    <string name="position_title">Posisi indikator</string>
+    <string name="position_description">Seret indikator langsung di layar untuk menempatkannya sesuka hati. Posisi terakhir akan disimpan.</string>
+    <string name="position_saved">Posisi tersimpan</string>
+    <string name="status_ready">Siap digunakan</string>
+    <string name="status_running">Indikator sedang aktif</string>
 </resources>
