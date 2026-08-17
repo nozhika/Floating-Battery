@@ -12,4 +12,7 @@
     <string name="position_saved">Posisi tersimpan</string>
     <string name="status_ready">Siap digunakan</string>
     <string name="status_running">Indikator sedang aktif</string>
+    <string name="position_default">Posisi default</string>
+    <string name="theme_switch_to_dark">Aktifkan mode gelap</string>
+    <string name="theme_switch_to_light">Aktifkan mode terang</string>
 </resources>
