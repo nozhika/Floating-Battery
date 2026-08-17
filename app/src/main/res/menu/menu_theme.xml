@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/action_theme"
         android:icon="@drawable/ic_dark_mode"
-        android:title="Mode gelap"
-        android:showAsAction="always" />
+        android:title="@string/theme_switch_to_dark"
+        android:contentDescription="@string/theme_switch_to_dark"
+        app:showAsAction="always" />
+
 </menu>
