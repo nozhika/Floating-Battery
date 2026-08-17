@@ -1,10 +1,12 @@
 package com.example.floatingbattery
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -22,130 +24,301 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvPosition: TextView
     private lateinit var btnGrantPermission: MaterialButton
     private lateinit var btnStart: MaterialButton
+    private lateinit var btnStop: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         applySavedTheme()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         tvStatus = findViewById(R.id.tvStatus)
         tvPosition = findViewById(R.id.tvPosition)
+
         btnGrantPermission = findViewById(R.id.btnGrantPermission)
         btnStart = findViewById(R.id.btnStart)
+        btnStop = findViewById(R.id.btnStop)
 
-        setSupportActionBar(findViewById(R.id.topAppBar))
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(
+            R.id.topAppBar
+        )
+
+        setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(true)
 
-        val btnStop = findViewById<MaterialButton>(R.id.btnStop)
-
         btnGrantPermission.setOnClickListener {
+
             if (!Settings.canDrawOverlays(this)) {
-                startActivity(
-                    Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:$packageName")
-                    )
+
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
                 )
+
+                startActivity(intent)
             }
         }
 
         btnStart.setOnClickListener {
+
             if (Settings.canDrawOverlays(this)) {
-                val serviceIntent = Intent(this, FloatingBatteryService::class.java)
+
+                val serviceIntent = Intent(
+                    this,
+                    FloatingBatteryService::class.java
+                )
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(serviceIntent)
                 } else {
                     startService(serviceIntent)
                 }
+
                 tvStatus.text = getString(R.string.status_running)
+
             } else {
-                tvStatus.text = getString(R.string.permission_missing)
+
+                tvStatus.text = getString(
+                    R.string.permission_missing
+                )
             }
         }
 
         btnStop.setOnClickListener {
-            stopService(Intent(this, FloatingBatteryService::class.java))
-            tvStatus.text = getString(R.string.status_ready)
+
+            stopService(
+                Intent(
+                    this,
+                    FloatingBatteryService::class.java
+                )
+            )
+
+            tvStatus.text = getString(
+                R.string.status_ready
+            )
         }
     }
 
-    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_theme, menu)
-        updateThemeIcon(menu.findItem(R.id.action_theme))
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+
+        menuInflater.inflate(
+            R.menu.menu_theme,
+            menu
+        )
+
+        val themeItem = menu.findItem(
+            R.id.action_theme
+        )
+
+        updateThemeIcon(themeItem)
+
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_theme) {
-            val darkMode = !isDarkModeEnabled()
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                .edit()
-                .putBoolean(DARK_MODE, darkMode)
-                .apply()
+    override fun onOptionsItemSelected(
+        item: MenuItem
+    ): Boolean {
 
-            AppCompatDelegate.setDefaultNightMode(
-                if (darkMode) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
-            return true
+        return when (item.itemId) {
+
+            R.id.action_theme -> {
+
+                toggleTheme()
+
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 
-    override fun onResume() {
-        super.onResume()
-        val granted = Settings.canDrawOverlays(this)
-        tvStatus.text = if (granted) {
-            getString(R.string.permission_granted)
-        } else {
-            getString(R.string.permission_missing)
-        }
-        btnGrantPermission.isEnabled = !granted
-        updatePositionLabel()
+    private fun toggleTheme() {
+
+        val darkMode = !isDarkModeEnabled()
+
+        getSharedPreferences(
+            PREFS_NAME,
+            MODE_PRIVATE
+        )
+            .edit()
+            .putBoolean(
+                DARK_MODE,
+                darkMode
+            )
+            .apply()
+
+        AppCompatDelegate.setDefaultNightMode(
+
+            if (darkMode) {
+                AppCompatDelegate.MODE_NIGHT_YES
+            } else {
+                AppCompatDelegate.MODE_NIGHT_NO
+            }
+        )
     }
 
     private fun applySavedTheme() {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+
+        val prefs = getSharedPreferences(
+            PREFS_NAME,
+            MODE_PRIVATE
+        )
+
         if (prefs.contains(DARK_MODE)) {
+
+            val darkMode = prefs.getBoolean(
+                DARK_MODE,
+                false
+            )
+
             AppCompatDelegate.setDefaultNightMode(
-                if (prefs.getBoolean(DARK_MODE, false)) {
+
+                if (darkMode) {
                     AppCompatDelegate.MODE_NIGHT_YES
                 } else {
                     AppCompatDelegate.MODE_NIGHT_NO
                 }
             )
+
         } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+
+            AppCompatDelegate.setDefaultNightMode(
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            )
         }
     }
 
-    private fun isDarkModeEnabled(): Boolean = when (AppCompatDelegate.getDefaultNightMode()) {
-        AppCompatDelegate.MODE_NIGHT_YES -> true
-        AppCompatDelegate.MODE_NIGHT_NO -> false
-        else -> (resources.configuration.uiMode and
-            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
-            android.content.res.Configuration.UI_MODE_NIGHT_YES
+    private fun isDarkModeEnabled(): Boolean {
+
+        return when (
+            AppCompatDelegate.getDefaultNightMode()
+        ) {
+
+            AppCompatDelegate.MODE_NIGHT_YES -> true
+
+            AppCompatDelegate.MODE_NIGHT_NO -> false
+
+            else -> {
+
+                val currentNightMode =
+                    resources.configuration.uiMode and
+                        Configuration.UI_MODE_NIGHT_MASK
+
+                currentNightMode ==
+                    Configuration.UI_MODE_NIGHT_YES
+            }
+        }
     }
 
-    private fun updateThemeIcon(item: MenuItem?) {
-        item?.setIcon(
-            if (isDarkModeEnabled()) R.drawable.ic_light_mode
-            else R.drawable.ic_dark_mode
+    private fun updateThemeIcon(
+        item: MenuItem?
+    ) {
+
+        if (item == null) {
+            return
+        }
+
+        val darkMode = isDarkModeEnabled()
+
+        if (darkMode) {
+
+            item.setIcon(
+                R.drawable.ic_light_mode
+            )
+
+            item.title = getString(
+                R.string.theme_switch_to_light
+            )
+
+            item.contentDescription = getString(
+                R.string.theme_switch_to_light
+            )
+
+        } else {
+
+            item.setIcon(
+                R.drawable.ic_dark_mode
+            )
+
+            item.title = getString(
+                R.string.theme_switch_to_dark
+            )
+
+            item.contentDescription = getString(
+                R.string.theme_switch_to_dark
+            )
+        }
+    }
+
+    override fun onResume() {
+
+        super.onResume()
+
+        updateStatus()
+        updatePositionLabel()
+    }
+
+    private fun updateStatus() {
+
+        val granted = Settings.canDrawOverlays(
+            this
         )
-        item?.title = getString(
-            if (isDarkModeEnabled()) R.string.theme_switch_to_light
-            else R.string.theme_switch_to_dark
-        )
+
+        tvStatus.text = if (granted) {
+
+            getString(
+                R.string.permission_granted
+            )
+
+        } else {
+
+            getString(
+                R.string.permission_missing
+            )
+        }
+
+        btnGrantPermission.isEnabled = !granted
     }
 
     private fun updatePositionLabel() {
-        val prefs = getSharedPreferences(FloatingBatteryService.PREFS_NAME, MODE_PRIVATE)
-        if (prefs.contains(FloatingBatteryService.POSITION_X) && prefs.contains(FloatingBatteryService.POSITION_Y)) {
-            val x = prefs.getInt(FloatingBatteryService.POSITION_X, 0)
-            val y = prefs.getInt(FloatingBatteryService.POSITION_Y, 200)
-            tvPosition.text = getString(R.string.position_saved) + " • x=$x, y=$y"
+
+        val prefs = getSharedPreferences(
+            FloatingBatteryService.PREFS_NAME,
+            MODE_PRIVATE
+        )
+
+        val hasX = prefs.contains(
+            FloatingBatteryService.POSITION_X
+        )
+
+        val hasY = prefs.contains(
+            FloatingBatteryService.POSITION_Y
+        )
+
+        if (hasX && hasY) {
+
+            val x = prefs.getInt(
+                FloatingBatteryService.POSITION_X,
+                0
+            )
+
+            val y = prefs.getInt(
+                FloatingBatteryService.POSITION_Y,
+                200
+            )
+
+            tvPosition.text =
+                getString(
+                    R.string.position_saved
+                ) + " • x=$x, y=$y"
+
         } else {
-            tvPosition.text = getString(R.string.position_default)
+
+            tvPosition.text =
+                getString(
+                    R.string.position_default
+                )
         }
     }
 }
